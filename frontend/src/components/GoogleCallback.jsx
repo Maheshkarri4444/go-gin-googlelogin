@@ -1,39 +1,56 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import API from '../api';
 
 const GoogleCallback = ({ setUser }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const processedRef = useRef(false);
 
   useEffect(() => {
     const handleCallback = async () => {
+      // If already processed this code, skip
+      if (processedRef.current) {
+        return;
+      }
+
       try {
-        // Get the code from the URL
         const code = new URLSearchParams(location.search).get('code');
         if (!code) {
           throw new Error('No authorization code received');
         }
 
+        // Mark as processed before making the request
+        processedRef.current = true;
+
         // Send the code to our backend
-        const response = await API.get(`/google/callback${location.search}`);
-        const data = response.data;
+        const response = await API.get(`/google/callback?code=${code}`);
+        console.log('Backend response:', response.data);
         
-        if (data.token && data.user) {
-          localStorage.setItem('token', data.token);
-          setUser(data.user);
+        if (response.data.token && response.data.user) {
+          localStorage.setItem('token', response.data.token);
+          setUser(response.data.user);
           navigate('/profile');
         } else {
           throw new Error('Invalid response from server');
         }
       } catch (error) {
         console.error('Google callback error:', error);
-        navigate('/login');
+        // Only show alert and navigate if we haven't processed successfully
+        if (processedRef.current) {
+          alert('Failed to complete Google login. Please try again.');
+          navigate('/login');
+        }
       }
     };
 
     handleCallback();
-  }, [navigate, location.search, setUser]);
+
+    // Cleanup function
+    return () => {
+      processedRef.current = false;
+    };
+  }, [location.search, navigate, setUser]);
 
   return (
     <div style={{

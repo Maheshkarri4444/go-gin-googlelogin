@@ -62,9 +62,7 @@ const Profile = ({ user, setUser }) => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        console.log("Fetching profile data...");
         const { data } = await API.get("/profile");
-        console.log("Profile data:", data);
         setUser(data.user);
       } catch (err) {
         console.error("Profile fetch error:", err.response?.data || err.message);
@@ -79,7 +77,6 @@ const Profile = ({ user, setUser }) => {
   }, [setUser]);
 
   const handleLogout = () => {
-    console.log("Logging out...");
     localStorage.removeItem("token");
     setUser(null);
   };

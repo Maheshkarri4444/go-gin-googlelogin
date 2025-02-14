@@ -50,6 +50,15 @@ const Login = ({ setUser }) => {
       fontSize: "1rem",
       fontWeight: "500",
     },
+    googleButton: {
+      backgroundColor: "#fff",
+      color: "#374151",
+      border: "1px solid #d1d5db",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "8px",
+    },
     buttonDisabled: {
       backgroundColor: "#9ca3af",
       cursor: "not-allowed",
@@ -78,21 +87,16 @@ const Login = ({ setUser }) => {
       color: "#ef4444",
       marginBottom: "1rem",
       textAlign: "center",
-    }
+    },
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
-      console.log("Attempting login with:", { email, password });
-      const response = await API.post("/login", { 
-        email: email,
-        password: password 
-      });
-      console.log("Login response:", response);
-      
+      const response = await API.post("/login", { email, password });
+
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
         setUser(response.data.user);
@@ -108,11 +112,7 @@ const Login = ({ setUser }) => {
   };
 
   const handleGoogleLogin = () => {
-    // Include the redirect_uri as a query parameter
-    const redirectUri = encodeURIComponent(
-        `${window.location.origin}/google/callback`
-      );
-    window.location.href = `http://localhost:8080/auth/google?redirect_uri=${redirectUri}`;
+    window.location.href = `http://localhost:8080/auth/google`;
   };
 
   return (
@@ -136,11 +136,11 @@ const Login = ({ setUser }) => {
             style={styles.input}
             required
           />
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             style={{
               ...styles.button,
-              ...(isLoading ? styles.buttonDisabled : {})
+              ...(isLoading ? styles.buttonDisabled : {}),
             }}
             disabled={isLoading}
           >
@@ -153,21 +153,12 @@ const Login = ({ setUser }) => {
           <span style={styles.dividerText}>or</span>
         </div>
 
-        <button 
+        <button
           onClick={handleGoogleLogin}
-          style={{
-            ...styles.button,
-            backgroundColor: "#fff",
-            color: "#374151",
-            border: "1px solid #d1d5db",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-          }}
+          style={{ ...styles.button, ...styles.googleButton }}
         >
-          <img 
-            src="https://www.google.com/favicon.ico" 
+          <img
+            src="https://www.google.com/favicon.ico"
             alt="Google"
             style={{ width: "20px", height: "20px" }}
           />

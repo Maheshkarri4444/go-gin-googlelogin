@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -99,18 +100,22 @@ func GoogleCallback(c *gin.Context) {
 		return
 	}
 
-	token, err := googleOauthConfig.Exchange(context.Background(), code)
+	fmt.Println("code: ", code)
+
+	token, err := googleOauthConfig.Exchange(context.TODO(), code)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to exchange code", "details": err.Error()})
 		return
 	}
-
+	fmt.Println("token : ", token)
 	userInfoResp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user info", "details": err.Error()})
 		return
 	}
 	defer userInfoResp.Body.Close()
+
+	fmt.Println("user info resp: ", userInfoResp)
 
 	var userInfo map[string]interface{}
 	if err := json.NewDecoder(userInfoResp.Body).Decode(&userInfo); err != nil {
